@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { ActionSheetController } from '@ionic/angular';
+import { ActionSheetController, AlertController } from '@ionic/angular';
+import { TmplAstBoundAttribute } from '@angular/compiler';
 
 @Component({
   selector: 'app-tab1',
@@ -15,7 +16,8 @@ export class Tab1Page {
   // todo: string;
 
   constructor(
-    public actionSheetController: ActionSheetController
+    public actionSheetController: ActionSheetController,
+    public alertController: AlertController
   ) {}
 
   ionViewWillEnter() {
@@ -35,13 +37,14 @@ export class Tab1Page {
           handler: () => {
             console.log('Destructive clicked');
             this.todos.splice(index, 1);
-            localStorage.tasks = JSON.stringify(this.todos);
+            localStorage.todos = JSON.stringify(this.todos);
           }
         }, {
           text: '変更',
           icon: 'create',
           handler: () => {
             console.log('Active clicked');
+            this._renameTodo(index);
           }
         }, {
           text: '閉じる',
@@ -54,6 +57,32 @@ export class Tab1Page {
       ]
     });
     await actionSheet.present();
+  }
+
+  async _renameTodo(index: number) {
+    const prompt = await this.alertController.create({
+      header: '変更後のタスク',
+      inputs: [
+        {
+          name: 'todo',
+          placeholder: 'タスク',
+          value: this.todos[index].name
+        },
+      ],
+      buttons: [
+        {
+          text: '閉じる'
+        },
+        {
+          text: '保存',
+          handler: data => {
+            this.todos[index] = { name: data.todo };
+            localStorage.todos = JSON.stringify(this.todos);
+          }
+        }
+      ]
+    });
+    prompt.present();
   }
 
 }
